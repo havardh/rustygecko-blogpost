@@ -29,47 +29,58 @@ The resulting platform, called RustyGecko, was evaluated by implementing two app
 ## SensorTracker ##
 
 The SensorTracker application uses the [Giant Gecko Starter Kit][stk], the [Biometric Expansion Evaluation Board][bio] and an [USB TTL FTDI Cable][ftdi].
-The application senses, each _n_ millisecond, the internal temperature sensor on the Starter Kit and the Humidity and Temperature sensor on the Biometric board and stores this data in RAM.
+The application senses, each _n_ millisecond, the Internal Temperature sensor on the Starter Kit and the Humidity and Temperature sensor on the Biometric Board, and stores this data in RAM.
 The application exposes the data through a Command Line Interface over UART using the USB cable.
 
 ![SensorTracker](img/project-i.png)
 
-We used this application to measure the Energy Consumption of an application written in Rust and compared it to an equivalent application written in C using the libraries provided with Simplicity Studio.
+We used this application to measure the Energy Consumption of an application written in Rust, and compared it to an equivalent application written in C using the libraries provided with Simplicity Studio.
 
 ![Os vs O3 vs Rust](img/best.png)
 
-As seen above the energy consumption of the Rust application is never more than 15% more than the best performing C application given at the Os optimization level.
-In addition the O3 optimization level for the C application performs worse than both the Rust and C Os version.
-This was found to be due to a poor cache hit ratio for the O3 version.
+As seen above the energy consumption of the Rust application is never more than 15% more than the best performing C application, given at the Os optimization level.
+In addition, the O3 optimization level for the C application performs worse than both the Rust and C Os version.
+This was further explored and found to be caused by poor cache hit ratio for the O3 version.
 
 ## CircleGame ##
 
 The CircleGame application is a graphical game written for the [Giant Gecko Development Kit][dk].
 The game was initially written as a solution to one of the assignment for the course [TDT4258](http://www.ntnu.edu/studies/courses/TDT4258) by Antonio Garcia Guirado.
-We adapted the game and ported it to Rust.
+We adapted the game for our needs and ported it to Rust.
 
 ![CircleGame](img/circle-game.jpg)
 
-To measure the performance of the game we recorded the Frames Per Seconds and compared the results over the standard range of optimization levels.
+To measure the performance of the game we recorded number of frames/seconds and compared the results over the standard set of optimization levels.
 
 ![CircleGame Performance](img/perf.png)
 
-The results shows that on the best performing builds Rust and C expose comparable performance.
-As a curiosity the performance decrease for the O3 build is caused by the _-ftree-loop-distribute-patterns_ optimization flag.
+The results shows that on the best performing builds, Rust and C have comparable performance.
+As a curiosity, the performance decrease for the O3 build is caused by the _-ftree-loop-distribute-patterns_ optimization flag.
 
 ## Code Size ##
 
 An important metric in embedded computing is the size of the end binary.
-This binary must fit in the storage of the microcontroller and the size of this storage is directly related to the cost of the system as a whole.
-We measured the size of the SensorTracker and Circle Game built at different optimization levels.
+This binary must fit in the storage of the microcontroller, and the size of this storage is directly related to the cost of the system as a whole.
+We measured the size of the SensorTracker and CircleGame built at the standard set of optimization levels.
 
 ![Code Size](img/size.png)
 
-We see clearly from the results that the debug and optimized Rust builds are quite large compared to all other builds.
+We see clearly from the results that the debug and optimized Rust builds are quite large, compared to all other builds.
 And in addition the size of C build is always smaller than the Rust build.
 The smallest Rust SensorTracker build is 2.2x larger than the smallest C build of the same application.
 
+## Summary of our discussion ##
+
+Through this project we have found that the performance and energy consumption are quite similar for Rust and C application.
+However, the code size of Rust binaries are larger than their C counterparts, especially when building for debugging.
+
+The language in it self did not pose any restrictions on the programmability in a bare-metal system, due to the modularity of the standard library.
+And we were able to adapt the build system for our platform.
+Although all this modularity, we found that reusing existing libraries which depend on the standard library as a whole (in practice nearly all libraries), are impossible to reuse, or requires modification of the library to be used.
+
 ## How to make a RustyGecko Project ##
+
+For the interested reader, we include a small how-to on getting started developing Rust on the Giant Gecko Starter Kit.
 
 ### Prerequisite ###
 - nightly version of the [Rust compiler](http://www.rust-lang.org/install.html).
@@ -81,15 +92,6 @@ We have set up a small seed project which includes the uses the emlib bindings t
 On a system satisfying the prerequisites given above, the program is compile with the command `cargo build --target thumbv7m-none-eabi`.
 To produce a binary file run the command `arm-none-eabi-objcopy -O binary target/thumbv7m-none-eabi/debug/seed seed.bin`.
 This can be flashed to the Starter Kit.
-
-## Summary of our discussion ##
-
-Through this project we have found that the performance and energy consumption are quite similar for Rust and C application.
-However, the code size of Rust binaries are larger than their C counterparts, especially when building for debugging.
-
-The language in it self did not pose any restrictions on the programmability in a bare-metal system, due to the modularity of the standard library.
-And we were able to adapt the build system for our platform.
-Although all this modularity, we found that reusing existing libraries which depend on the standard library as a whole (in practice nearly all libraries), are impossible to reuse, or requires modification of the library to be used.
 
 ## Materials/Boards ##
 - [Giant Gecko Starter Kit][stk]
